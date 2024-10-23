@@ -1,6 +1,5 @@
 <?php
 session_start();
-
 $admins_file = 'admins.json';
 
 function load_admins($admins_file) {
@@ -11,14 +10,11 @@ function load_admins($admins_file) {
         return [];
     }
 }
-
 function save_admins($admins_file, $admins) {
     $admins_json = json_encode($admins, JSON_PRETTY_PRINT);
     file_put_contents($admins_file, $admins_json);
 }
-
 $admins = load_admins($admins_file);
-
 if (isset($_POST['login'])) {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
@@ -791,9 +787,6 @@ async function fetchLogs() {
 
 fetchLogs();
 </script>
-
-
-
   <script>
     var ctx = document.getElementById('userChart').getContext('2d');
     var chartTypes = ['bar', 'line', 'pie', 'doughnut', 'radar', 'polarArea'];
@@ -864,7 +857,6 @@ function copyToClipboard(button, username) {
         });
         return response.json();
     }
-
     addAdminForm.addEventListener('submit', async (e) => {
         e.preventDefault();  
         const username = document.getElementById('addUsername').value;
@@ -881,8 +873,6 @@ function copyToClipboard(button, username) {
         // Display result
         showMessage(result.message, result.status === 'success');
     });
-
-    // Handle Remove Admin Form submission
     removeAdminForm.addEventListener('submit', async (e) => {
         e.preventDefault();  // Prevent form from submitting the traditional way
 
@@ -892,10 +882,7 @@ function copyToClipboard(button, username) {
             action: 'remove',
             username: username,
         };
-
         const result = await sendRequest(data);
-
-        // Display result
         showMessage(result.message, result.status === 'success');
     });
 </script>
@@ -937,8 +924,6 @@ function changeBackground(gradientClass) {
   const gradientDiv = document.querySelector(`.${gradientClass}`);
   const computedStyle = window.getComputedStyle(gradientDiv);
   const newBackground = computedStyle.backgroundImage;
-
-  // Save the selected gradient in localStorage
   localStorage.setItem('selectedBackground', newBackground);
 
   let opacity = 1;
@@ -962,16 +947,12 @@ function changeBackground(gradientClass) {
     }
   }, 20); 
 }
-
-// Function to apply the saved background on page load
 function applySavedBackground() {
   const savedBackground = localStorage.getItem('selectedBackground');
   if (savedBackground) {
     document.body.style.backgroundImage = savedBackground;
   }
 }
-
-// Call the function on page load
 window.onload = applySavedBackground;
 </script>
 
