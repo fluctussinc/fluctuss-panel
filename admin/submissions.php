@@ -29,16 +29,21 @@ if (isset($_POST['delete_submission'])) {
         $fileContents = file_get_contents($filePath);
         $fileContents = str_replace("\r\n", "\n", $fileContents);
         $submissions = array_filter(preg_split('/\n(?=Name:)/', $fileContents));
+        $submissionsReversed = array_reverse($submissions);
 
-        if (isset($submissions[$deleteIndex])) {
-            $deletedSubmission = $submissions[$deleteIndex];
-            unset($submissions[$deleteIndex]);
+        if (isset($submissionsReversed[$deleteIndex])) {
+            $deletedSubmission = $submissionsReversed[$deleteIndex];
 
-            file_put_contents($deletedFilePath, $deletedSubmission . "\n\n", FILE_APPEND);
-            file_put_contents($filePath, implode("\n\n", $submissions));
+            $keyToDelete = array_search($deletedSubmission, $submissions);
+            if ($keyToDelete !== false) {
+                unset($submissions[$keyToDelete]);
 
-            header('Location: ' . $_SERVER['PHP_SELF']);
-            exit;
+                file_put_contents($filePath, implode("\n\n", $submissions));
+                file_put_contents($deletedFilePath, $deletedSubmission . "\n\n", FILE_APPEND);
+
+                header('Location: ' . $_SERVER['PHP_SELF']);
+                exit;
+            }
         } else {
             die("<p class='error'>Invalid submission index.</p>");
         }
@@ -87,7 +92,7 @@ if (isset($_POST['delete_all'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="image/png" href="logo1.webp" />
+    <link rel="icon" type="image/png" href="https://trendsignite.com/logo1.png" />
     <style>
         .advanced-details {
             display: none;
@@ -152,13 +157,16 @@ if (file_exists($filePath)) {
     foreach ($submissions as $index => $submission) {
         $lines = array_map('trim', explode("\n", $submission));
 
-        $name = $email = $subject = $message = $date = $ip = 'N/A';
+        $name = $email = $subject = $message = $date = $ip = $phone = 'N/A';
 
         foreach ($lines as $line) {
             if (strpos($line, 'Name:') === 0) {
                 $name = htmlspecialchars(trim(substr($line, 5)), ENT_QUOTES, 'UTF-8');
             } elseif (strpos($line, 'Email:') === 0) {
                 $email = htmlspecialchars(trim(substr($line, 6)), ENT_QUOTES, 'UTF-8');
+            } elseif (strpos($line, 'Phone:') === 0) {
+                $phone = htmlspecialchars(trim(substr($line, 6)), ENT_QUOTES, 'UTF-8');
+                $phone = !empty($phone) ? $phone : 'NULL'; // Show NULL if phone is empty
             } elseif (strpos($line, 'Subject:') === 0) {
                 $subject = htmlspecialchars(trim(substr($line, 8)), ENT_QUOTES, 'UTF-8');
             } elseif (strpos($line, 'Message:') === 0) {
@@ -174,6 +182,7 @@ if (file_exists($filePath)) {
         echo "<h3>Submission " . ($index + 1) . "</h3>";
         echo "<p><strong>Name:</strong> $name</p>";
         echo "<p><strong>Email:</strong> $email</p>";
+        echo "<p><strong>Phone:</strong> $phone</p>"; // Display phone number or "NULL"
         echo "<p><strong>Subject:</strong> $subject</p>";
         echo "<p><strong>Message:</strong> $message</p>";
         echo "<p><span class='show-details' data-index='$index'>Advanced Details</span></p>";
@@ -193,9 +202,8 @@ if (file_exists($filePath)) {
     echo "<p class='error'>The file was not found.</p>";
 }
 ?>
-
 <div>
-    <a href="index.php" class="back-btn">Return</a>
+    <a href="https://trendsignite.com/admin/index.php" class="back-btn">Return</a>
     <form action="download_submissions.php" method="post">
         <button type="submit" class="dscsv">Download Submissions CSV</button>
     </form>
@@ -321,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function scrollToBottom() {
         window.scrollTo({
             top: document.body.scrollHeight,
-            behavior: 'smooth' 
+            behavior: 'smooth'  // Smooth scroll
         });
     }
 
@@ -338,4 +346,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </body>
 </html>
-
